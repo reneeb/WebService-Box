@@ -22,13 +22,19 @@ has auth_client   => (is => 'lazy', isa => InstanceOf["OAuth2::Box"]);
 sub file {
     my ($self, $id) = @_;
 
-    return WebService::Box::File->new( id => $id, session => $self );
+    my %opts;
+    $opts{id} = $id if defined $id;
+
+    return WebService::Box::File->new( %opts, session => $self );
 }
 
 sub folder {
     my ($self, $id) = @_;
 
-    return WebService::Box::Folder->new( id => $id, session => $self );
+    my %opts;
+    $opts{id} = $id if defined $id;
+
+    return WebService::Box::Folder->new( %opts, session => $self );
 }
 
 sub check {
