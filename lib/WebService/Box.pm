@@ -18,7 +18,14 @@ has on_error   => (is => 'ro', isa => sub{
              ( ref $_[0] and ref $_[0] ne 'CODE' ) ||
              ( !ref $_[0] and defined $_[0] and $_[0] ne 'die' and $_[0] ne 'warn' )
          );
-     }, default => sub{ \&my_die } );
+     }, default => sub{ \&_my_die } );
+
+has on_warn   => (is => 'ro', isa => sub{
+         die "invalid value for 'on_warn'" if (
+             ( ref $_[0] and ref $_[0] ne 'CODE' ) ||
+             !ref $_[0]
+         );
+     }, default => sub{ \&_my_warn } );
 
 sub error {
     my ($self, $message) = @_;
@@ -26,6 +33,28 @@ sub error {
     return if !$self->on_error;
 
     if ( !ref $self->on_error ) {
+        if ( $self->on_error eq 'die' ) {
+            _my_die( $message );
+        }
+        if ( $self->on_warn eq 'warn' ) {
+            _my_warn( $message );
+        }
+    }
+    else {
+        $self->on_error->( $message );
+    }
+}
+
+sub warn {
+    my ($self, $message) = @_;
+
+    return if !$self->on_warn;
+
+    if ( !ref $self->on_warn ) {
+        _my_warn( $message );
+    }
+    else {
+        $self->on_warn->( $message );
     }
 }
 
@@ -33,12 +62,12 @@ sub create_session {
     my ($self)
 }
 
-sub my_die {
-    croak $_[1];
+sub _my_die {
+    croak $_[0];
 }
 
-sub my_warn {
-    carp $_[1];
+sub _my_warn {
+    carp $_[0];
 }
 
 1;
