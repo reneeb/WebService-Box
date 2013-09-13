@@ -7,7 +7,7 @@ use Moo;
 use Sub::Identify qw(sub_name);
 use Types::Standard qw(Str Int InstanceOf);
 
-use WebService::Box::Types::Library qw(BoxPerson Timestamp BoxFolderHash OptionalStr);
+use WebService::Box::Types::Library qw(BoxPerson Timestamp BoxFolderHash OptionalStr SharedLink);
 use WebService::Box::Request;
 use WebService::Box::Folder;
 
