@@ -7,11 +7,18 @@ use Type::Library
     -base,
     -declare => qw(
         BoxPerson PersonHash Timestamp BoxFolderHash BoxFileHash
-        OptionalStr OptionalInt
+        OptionalStr OptionalInt OptionalTimestamp
+        SharedLink SharedLinkHash SharedLinkPermissionHash
     );
 
 use Type::Utils -all;
 use Types::Standard -types;
+
+use DateTime;
+
+use WebService::Box::Types::By;
+use WebService::Box::Types::SharedLink;
+
 
 # create some basic types
 {
@@ -43,9 +50,13 @@ use Types::Standard -types;
     coerce Timestamp =>
         from Str() => via {
             my ($timezone) = $_ =~ m{([+-][0-9]{2}:?[0-9]{2})\z};
+            $timezone = '' if !defined $timezone;
             $timezone =~ s{:}{};
 
-            my ($year,$month,$day,$hour,$minute,$second) = split /[:T-]/, $_;
+            my %opts;
+            $opts{time_zone} = $timezone if defined $timezone and $timezone ne '';
+
+            my ($year,$month,$day,$hour,$minute,$second) = split /[:T+-]/, $_;
             DateTime->new(
                 second    => $second,
                 minute    => $minute,
@@ -53,9 +64,11 @@ use Types::Standard -types;
                 day       => $day,
                 month     => $month,
                 year      => $year,
-                time_zone => $timezone,
+                %opts,
             );
         };
+
+        declare OptionalTimestamp => as union[Timestamp, Undef];
 }
 
 {
@@ -76,6 +89,35 @@ use Types::Standard -types;
             etag        => OptionalStr,
             name        => Str,
         ];
+}
+
+{
+    # shared link objects
+    class_type SharedLink => { class => 'WebService::Box::Types::SharedLink' };
+
+    declare SharedLinkPermissionHash =>
+        as Dict[
+            can_download    => Str,
+            can_preview     => Str,
+        ];
+
+    declare SharedLinkHash => 
+        as Dict[
+            url                 => Str,
+            download_url        => Str,
+            vanity_url          => OptionalStr,
+            is_password_enabled => OptionalStr,
+            unshared_at         => OptionalTimestamp,
+            download_count      => Int,
+            preview_count       => Int,
+            access              => Str,
+            permissions         => SharedLinkPermissionHash,
+        ];
+
+    coerce SharedLink
+        from SharedLinkHash => via {
+            WebService::Box::Types::SharedLink->new( %{$_} );
+        };
 }
 
 1;
