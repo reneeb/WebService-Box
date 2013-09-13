@@ -17,7 +17,6 @@ use Types::Standard -types;
 use DateTime;
 
 use WebService::Box::Types::By;
-use WebService::Box::Types::SharedLink;
 
 
 # create some basic types
@@ -113,6 +112,8 @@ use WebService::Box::Types::SharedLink;
             access              => Str,
             permissions         => SharedLinkPermissionHash,
         ];
+
+    require WebService::Box::Types::SharedLink;
 
     coerce SharedLink
         from SharedLinkHash => via {
