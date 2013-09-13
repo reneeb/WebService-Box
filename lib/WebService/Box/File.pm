@@ -11,6 +11,8 @@ use WebService::Box::Types::Library qw(BoxPerson Timestamp BoxFolderHash Optiona
 use WebService::Box::Request;
 use WebService::Box::Folder;
 
+our $VERSION = 0.01;
+
 has session => (is => 'ro', isa => InstanceOf["WebService::Box::Session"], required => 1);
 
 has [qw/type id name description structure/] => (
@@ -66,6 +68,8 @@ has request => (
 
 has _parent_object => (is => 'rwp', isa => InstanceOf["WebService::Box::Folder"]);
 
+has error => (is => 'rwp', isa => Str);
+
 around [qw(
     size comment_count created_by modified_by owned_by created_at modified_at trashed_at purged_at
     content_created_at content_modified_at type name description structure shared_link
@@ -95,6 +99,8 @@ around [qw(
 sub rebuild {
     my ($self) = @_;
 
+    $self->_set_error('');
+
     if ( !$self->id ) {
         $self->session->box->error( 'cannot rebuild: file id does not exist' );
         return;
@@ -105,7 +111,7 @@ sub rebuild {
         ressource => 'files',
         action    => 'get',
         id        => $self->id,
-    );
+    ) or do { $self->_set_error( $self->request->error ); return };
 
     $self = $_[0] = WebService::Box::File->new( %file_data, session => $self->session );
 
@@ -144,13 +150,23 @@ sub parent {
 sub upload {
     my ($self, $path, $parent) = @_;
 
+    $self->_set_error('');
+
     my $parent_id = ref $parent ? $parent->id : $parent;
 
+    if ( !-e $path ) {
+        $self->session->box->error( 'the file requested to upload does not exist' );
+        return;
+    }
+
+    my $content = do{ local (@ARGV,$/) = $path; <> };
+
     my %upload_data = $self->request->do(
-        ressource => 'upload',
-        filename  => $path,
+        ressource => 'files',
+        action    => 'upload',
+        file      => { filename => $path, content => $content },
         parent_id => $parent_id, 
-    );
+    ) or do { $self->_set_error( $self->request->error ); return };
 
     my $uploaded_file = WebService::Box::File->new( %upload_data, session => $self->session );
     return $uploaded_file;
