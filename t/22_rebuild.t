@@ -40,10 +40,12 @@ my $session = WebService::Box::Session->new(
 
     throws_ok
         { $file->created_at }
-        qr/invalid method call: file id does not exist, create a new object with id/,
+        qr/invalid method call \(created_at\): file id does not exist, create a new object with id/,
         'rebuild via accessor on id-less file files';
 
-    is $error, 'invalid method call: file id does not exist, create a new object with id', 'no rebuild via accessor (no file id)';
+    is $error,
+        'invalid method call (created_at): file id does not exist, create a new object with id',
+        'no rebuild via accessor (no file id)';
 
     $error = '';
 }

@@ -74,12 +74,16 @@ around [qw(
     my $orig = shift;
     my $self = shift;
 
+    my $method_name = sub_name $orig;
+
     if ( !$self->id ) {
-        $self->session->box->error( 'invalid method call: file id does not exist, create a new object with id' );
+        $self->session->box->error(
+            "invalid method call ($method_name): file id does not exist, create a new object with id"
+        );
+
         return;
     }
 
-    my $method_name = sub_name $orig;
     my $predicate   = $self->can( 'has_' . $method_name );
     if ( !$self->$predicate() ) {
         $self = $_[1] = $self->rebuild;
@@ -99,10 +103,11 @@ sub rebuild {
     my $parent_object = $self->_parent_object;
     my %file_data = $self->request->do(
         ressource => 'files',
+        action    => 'get',
         id        => $self->id,
     );
 
-    $_[0] = WebService::Box::File->new( %file_data, session => $self->session );
+    $self = $_[0] = WebService::Box::File->new( %file_data, session => $self->session );
 
     if ( $parent_object && $parent_object->id == $_[0]->parent_data->{id} ) {
         $_[0]->_set__parent_object( $parent_object );
@@ -122,12 +127,7 @@ sub parent {
             return;
         }
 
-        my %file_data = $self->request->do(
-            ressource => 'files',
-            id        => $self->id,
-        );
-
-        $self = $_[0] = WebService::Box::File->new( %file_data, session => $self->session );
+        $self = $_[0] = $self->rebuild;
     }
 
     if ( !$self->_parent_object ) {

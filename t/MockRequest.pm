@@ -10,6 +10,8 @@ sub do {
     my $self   = shift;
     my %params = @_;
 
+    my $action = delete $params{action};
+
     my $key = join ':', map{ $_, $params{$_} }sort keys %params;
 
     return %{ _returns($key) || {} };

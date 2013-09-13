@@ -8,7 +8,8 @@ use Types::Standard qw(InstanceOf);
 
 has session => (is => 'ro', isa => InstanceOf["WebService::Box::Session"], required => 1);
 
-sub request {
+sub do {
+    print STDERR "original";
 }
 
 1;
