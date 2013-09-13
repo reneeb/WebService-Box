@@ -27,11 +27,24 @@ my $session = WebService::Box::Session->new(
 
 {
     # a plain file object without any data
-    my $file   = WebService::Box::File( session => $session );
+    my $file   = WebService::Box::File->new( session => $session );
     my $folder = $file->parent;
 
     ok !$folder, 'no folder object';
     is $error, 'no id for parent found and no file id exists', 'no folder object (no file id)';
+
+    $error = '';
+}
+
+{
+    # a plain file object with id
+    my $file   = WebService::Box::File->new( id => 123, session => $session );
+    my $folder = $file->parent;
+
+    isa_ok $folder, 'WebService::Box::Folder';
+    is $error, '', 'empty error';
+    is $folder->name, 'folder_1', 'parent of file 123';
+    is $folder->id, 1, 'parents id';
 
     $error = '';
 }
