@@ -11,6 +11,8 @@ use Types::Standard qw(Str Int);
 
 use WebService::Box::Session;
 
+our $VERSION = 0.01;
+
 has api_url    => (is => 'ro', isa => Str, required => 1, default => sub{ "" } );
 has upload_url => (is => 'ro', isa => Str, required => 1, default => sub{ "" } );
 has on_error   => (is => 'ro', isa => sub{

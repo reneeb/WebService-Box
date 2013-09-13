@@ -9,6 +9,8 @@ use WebService::Box::Types::Library qw(BoxPerson Timestamp BoxFolderHash Optiona
 use WebService::Box::Request;
 use WebService::Box::File;
 
+our $VERSION = 0.01;
+
 has session => (is => 'ro', isa => InstanceOf["WebService::Box::Session"], required => 1);
 
 has [qw/type id name description structure/] => (

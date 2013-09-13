@@ -12,6 +12,8 @@ use Types::Standard qw(Str Int InstanceOf);
 use WebService::Box::File;
 use WebService::Box::Folder;
 
+our $VERSION = 0.01;
+
 has [qw/client_id client_secret redirect_uri/] => (is => 'ro', isa => Str, required => 1);
 has refresh_token => (is => 'rwp',  isa => Str, required => 1);
 has auth_token    => (is => 'rwp',  isa => Str);

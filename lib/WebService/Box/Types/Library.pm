@@ -18,6 +18,8 @@ use DateTime;
 
 use WebService::Box::Types::By;
 
+our $VERSION = 0.01;
+
 
 # create some basic types
 {
